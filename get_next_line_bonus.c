@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: souel-bo <souel-bo@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/21 01:42:09 by souel-bo          #+#    #+#             */
-/*   Updated: 2024/11/21 05:19:53 by souel-bo         ###   ########.fr       */
+/*   Created: 2024/11/21 09:20:59 by souel-bo          #+#    #+#             */
+/*   Updated: 2024/11/21 09:22:38 by souel-bo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 char	*ft_fill_line(char *line, char *buffer, char **container, int new_line)
 {
@@ -72,41 +72,26 @@ char	*ft_read_line(char *line, char **container, int fd)
 char	*get_next_line(int fd)
 {
 	char		*line;
-	static char	*container;
+	static char	*containers[OPEN_MAX];
 	char		*temporary;
 
 	line = NULL;
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd >= OPEN_MAX)
 		return (NULL);
-	if (container && !ft_strchr(container, '\n'))
+	if (containers[fd] && !ft_strchr(containers[fd], '\n'))
 	{
-		line = ft_strdup_up(container, '\0');
-		free(container);
-		container = NULL;
+		line = ft_strdup_up(containers[fd], '\0');
+		free(containers[fd]);
+		containers[fd] = NULL;
 	}
-	else if (container && ft_strchr(container, '\n'))
+	else if (containers[fd] && ft_strchr(containers[fd], '\n'))
 	{
-		temporary = ft_strdup_up(container, '\0');
-		free(container);
-		container = ft_strdup_up(ft_strchr(temporary, '\n') + 1, '\0');
+		temporary = ft_strdup_up(containers[fd], '\0');
+		free(containers[fd]);
+		containers[fd] = ft_strdup_up(ft_strchr(temporary, '\n') + 1, '\0');
 		line = ft_strdup_up(temporary, '\n');
 		free(temporary);
 		return (line);
 	}
-	return (ft_read_line(line, &container, fd));
+	return (ft_read_line(line, &containers[fd], fd));
 }
-
-/*int main()
-{
-    int fd = open("test", O_RDONLY);
-    //char *test;
-    //while ((test = get_next_line(fd)) != NULL)
-    //{
-		//close(0);
-        printf("%s", get_next_line(1));
-      //  free(test);
-	//}
-   // printf("\n");
-    close(fd);//       *s = 's'
-    return 0; 
-}*/
