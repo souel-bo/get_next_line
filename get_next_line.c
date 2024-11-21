@@ -1,146 +1,100 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: souel-bo <souel-bo@student.1337.ma>        +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/16 16:20:19 by souel-bo          #+#    #+#             */
-/*   Updated: 2024/11/19 20:45:26 by souel-bo         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "get_next_line.h"
 
-int	ft_check_new_line(char *container)
+char	*ft_fill_line(char *line, char *buffer, char **container, int new_line)
 {
-	int	i;
+	char	*temporary;
 
-	if (!container)
-		return (0);
-	i = 0;
-	while (container[i])
+	if (!line && new_line == 1)
+		line = ft_strdup_up(buffer, '\n');
+	else if (!line && new_line == 0)
+		line = ft_strdup_up(buffer, '\0');
+	else if (line)
 	{
-		if (container[i] == '\n')
-			return (1);
-		i++;
+		temporary = ft_strjoin_up(line, buffer);
+		free(line);
+		line = ft_strdup_up(temporary, '\0');
+		free(temporary);
 	}
-	return (0);
-}
-
-char	*ft_remain_line(char *container)
-{
-	char	*new_str;
-	int		i;
-	int		x;
-
-	x = 0;
-	i = 0;
-	if (container == NULL)
-		return (NULL);
-	while (container[i] != '\n' && container[i] != '\0')
-		i++;
-	if (container[i] == '\0')
-		return (free(container), NULL);
-	new_str = malloc(ft_strlen(container) - i);
-	if (!new_str)
-		return (free(container), NULL);
-	if (container[i] == '\n')
-		i++;
-	while (container[i + x])
+	if (new_line == 1)
+		*container = ft_strdup_up(ft_strchr(buffer, '\n') + 1, '\0');
+	if (ft_strchr(line, '\n') && *ft_strchr(line, '\n') + 1 != '\0')
 	{
-		new_str[x] = container[i + x];
-		x++;
+		temporary = ft_strdup_up(line, '\n');
+		free(line);
+		line = ft_strdup_up(temporary, '\n');
+		free(temporary);
 	}
-	new_str[x] = '\0';
-	return (free(container), new_str);
-}
-
-char	*ft_extract_line(char *container)
-{
-	char	*line;
-	int		i;
-	int		j;
-
-	i = 0;
-	j = 0;
-	if (container[0] == '\0')
-		return (NULL);
-	while (container[i] != '\0' && container[i] != '\n')
-		i++;
-	if (container[i] == '\n')
-	{
-		line = malloc(i + 2);
-		if (!line)
-			return (NULL);
-		line[i + 1] = '\0';
-		while (j <= i)
-		{
-			line[j] = container[j];
-			j++;
-		}
-	}
-	else
-		line = ft_strdup(container);
+	free(buffer);
 	return (line);
 }
 
-char	*ft_read_line(char *container, int fd)
+char	*ft_read_line(char *line, char **container, int fd)
 {
-	ssize_t	readed;
 	char	*buffer;
+	ssize_t	readed;
 
-	buffer = (char *)malloc(BUFFER_SIZE + 1);
-	if (!buffer)
-		return (NULL);
-	while (ft_check_new_line(container) == 0)
+	while (1)
 	{
-		readed = read(fd, buffer, BUFFER_SIZE);
-		if (readed <= 0)
-		{
-			if (readed == 0)
-				return (free(buffer), container);
-			return (free(buffer), free(container), NULL);
-		}
-		container = ft_strjoin(container, buffer);
-		if (!container)
+		buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE) + 1);
+		if (!buffer)
 			return (NULL);
+		readed = read(fd, buffer, BUFFER_SIZE);
+		if (readed < 0)
+		{
+			free(buffer);
+			free(line);
+			return (NULL);
+		}
+		else if (readed == 0)
+		{
+			free(buffer);
+			return (line);
+		}
+		buffer[readed] = '\0';
+		if (ft_strchr(buffer, '\n'))
+			return (ft_fill_line(line, buffer, &*container, 1));
+		line = ft_fill_line(line, buffer, &*container, 0);
 	}
-	return (container);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*container;
 	char		*line;
+	static char	*container;
+	char		*temporary;
 
+	line = NULL;
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	container = ft_read_line(container, fd);
-	if (!container)
-		return (NULL);
-	line = ft_extract_line(container);
-	if (!line)
+	if (container && !ft_strchr(container, '\n'))
 	{
+		line = ft_strdup_up(container, '\0');
 		free(container);
 		container = NULL;
 	}
-	container = ft_remain_line(container);
-	return (line);
+	else if (container && ft_strchr(container, '\n'))
+	{
+		temporary = ft_strdup_up(container, '\0');
+		free(container);
+		container = ft_strdup_up(ft_strchr(temporary, '\n') + 1, '\0');
+		line = ft_strdup_up(temporary, '\n');
+		free(temporary);
+		return (line);
+	}
+	return (ft_read_line(line, &container, fd));
 }
+
 int main()
 {
-    int fd = open("test", O_RDONLY);
-    char *test;
-    //while ((test = get_next_line(0)) != NULL)
+    int fd = open("test.txt", O_RDONLY);
+    //char *test;
+    //while ((test = get_next_line(fd)) != NULL)
     //{
-		//test = get_next_line(fd);
-      //  printf("%s", test);
+        printf("%s", get_next_line(fd));
 		printf("%s", get_next_line(fd));
 		printf("%s", get_next_line(fd));
-		printf("%s", get_next_line(fd));
-        //free(test);
-    //}
+      //  free(test);
+	//}
    // printf("\n");
     close(fd);
     return 0; 
