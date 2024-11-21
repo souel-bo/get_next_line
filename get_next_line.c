@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: souel-bo <souel-bo@student.1337.ma>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/21 01:42:09 by souel-bo          #+#    #+#             */
+/*   Updated: 2024/11/21 01:42:10 by souel-bo         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 
 char	*ft_fill_line(char *line, char *buffer, char **container, int new_line)
@@ -84,7 +96,7 @@ char	*get_next_line(int fd)
 	return (ft_read_line(line, &container, fd));
 }
 
-int main()
+/*int main()
 {
     int fd = open("test.txt", O_RDONLY);
     //char *test;
@@ -98,4 +110,4 @@ int main()
    // printf("\n");
     close(fd);
     return 0; 
-}
+}*/

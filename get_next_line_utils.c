@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_utils.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: souel-bo <souel-bo@student.1337.ma>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/21 01:42:37 by souel-bo          #+#    #+#             */
+/*   Updated: 2024/11/21 01:42:59 by souel-bo         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 
 char	*ft_strchr(const char *s, int c)
@@ -35,7 +47,7 @@ char	*ft_strdup_up(char *s1, char c)
 	int		character;
 	char	*s2;
 
-	if (*s1 == '\0')
+	if (!s1 || *s1 == '\0')
 		return (NULL);
 	character = 0;
 	if (c == '\0')
